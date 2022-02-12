@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: #333;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+        .wrapper * {
+            margin: 30px auto;
+        }
+        canvas {
+            background-color: #fff;
+        }
+    </style>
+    <script src="/index.js" async></script>
+</head>
+<body onload="resizeCanvas();">
+    <div class="wrapper">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+</body>
+</html>
