@@ -6,7 +6,7 @@
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-// Node info
+// Node specs
 const nodeFillStyle = "#22CCCC";
 const selectedNodeFillStyle = "#88aaaa";
 const nodeStrokeStyle = "#009999";
@@ -16,9 +16,24 @@ const nodeRadius = 7;
  *  END CONSTANTS
  */
 
-// Globals
+/*
+ *  BEGIN GLOBALS
+ */
+
+// An array of nodes currently on the canvas
+//  Each node element contains:
+//      x => current x position of the node
+//      y => current y position of the node
+//      selected => boolean of whether the node is currently selected
 let nodes = [];
+
+// Node that is currently being selected
 let currentSelected = undefined; 
+
+/*
+ *  END GLOBALS
+ */
+
 
 /*
  *  BEGIN HELPER FUNCTIONS
@@ -37,7 +52,7 @@ const getMousePosition = (mouseEvent) => {
             mouseEvent.clientY - rect.top];
 }
 
-// Draws a node at the current position
+// Draws all nodes from the `nodes` array 
 const drawNodes = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -52,6 +67,7 @@ const drawNodes = () => {
 }
 
 // Checks if the current mouse position is clicking on a node
+//  Will return the node if they are, undefined otherwise
 const clickedOnNode = (mouseX, mouseY) => {
     return nodes.find((node) => {
         return mouseX > (node.x - nodeRadius) &&
@@ -70,6 +86,8 @@ const clickedOnNode = (mouseX, mouseY) => {
  */
 
 canvas.addEventListener('mousemove', (event) => {
+    // If we are currently selecting a node, move it to the current
+    //   mouse position and redraw 
     if (currentSelected) { 
         const [mouseX, mouseY] = getMousePosition(event);
         currentSelected.x = mouseX;
@@ -80,11 +98,14 @@ canvas.addEventListener('mousemove', (event) => {
 
 canvas.addEventListener('mousedown', (event) => {
     const [mouseX, mouseY] = getMousePosition(event);
-
-    const clickedTarget = clickedOnNode(mouseX, mouseY);
+    
+    // If we're currently selecting a node, clear it 
     if (currentSelected && currentSelected.selected) {
         currentSelected.selected = false;
     } 
+
+    // Check if we are clicking on a node, and redraw 
+    const clickedTarget = clickedOnNode(mouseX, mouseY);
     if (clickedTarget) {
         currentSelected = clickedTarget;
         currentSelected.selected = true;
@@ -93,21 +114,28 @@ canvas.addEventListener('mousedown', (event) => {
 });
 
 canvas.addEventListener('mouseup', (event) => {
+    // If we aren't currently selecting a node, create a new one
+    //   at the current mouse position 
     if (!currentSelected) {
         const [mouseX, mouseY] = getMousePosition(event);
 
-        let newNode = {
+        const newNode = {
             x: mouseX,
             y: mouseY,
             selected: false
         };
+
         nodes.push(newNode);
         drawNodes();
     } 
+
+    // If we were selecting a node, let it go since we 'unclicked' it
     if (currentSelected && currentSelected.selected) {
         currentSelected.selected = false;
         currentSelected = undefined;
     }
+
+    // Redraw 
     drawNodes();
 });
 
