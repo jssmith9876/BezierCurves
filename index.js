@@ -6,11 +6,17 @@
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-// Node specs
+// Color and styling specs
 const nodeFillStyle = "#22CCCC";
 const selectedNodeFillStyle = "#88aaaa";
 const nodeStrokeStyle = "#009999";
 const nodeRadius = 7;
+
+const fontSize = 18;
+const fontStyle = fontSize + "px Arial";
+const fontColor = "#000000";
+
+const lineColor = "#000000";
 
 /*
  *  END CONSTANTS
@@ -52,17 +58,42 @@ const getMousePosition = (mouseEvent) => {
             mouseEvent.clientY - rect.top];
 }
 
+const drawLines = () => {
+    ctx.beginPath();
+    ctx.strokeStyle = lineColor;
+
+    nodes.forEach((node) => {
+        if (node.number != nodes.length) {
+            const nextNode = nodes[node.number];
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(nextNode.x, nextNode.y);
+        }
+    });
+    
+    ctx.stroke();
+}
+
 // Draws all nodes from the `nodes` array 
 const drawNodes = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontStyle;
+
+    // Draw lines connecting each node
+    drawLines();
 
     nodes.forEach((node) => {
         ctx.beginPath();
+
+        // Draw the node
         ctx.fillStyle = node.selected ? selectedNodeFillStyle : nodeFillStyle;
         ctx.arc(node.x, node.y, nodeRadius, 0, Math.PI * 2, true);
         ctx.strokeStyle = nodeStrokeStyle;
         ctx.stroke();
         ctx.fill();
+
+        // Draw the text for the node
+        ctx.fillStyle = fontColor;
+        ctx.fillText(`a${node.number}`, node.x + fontSize / 2, node.y + fontSize);
     });
 }
 
@@ -122,7 +153,8 @@ canvas.addEventListener('mouseup', (event) => {
         const newNode = {
             x: mouseX,
             y: mouseY,
-            selected: false
+            selected: false,
+            number: nodes.length + 1
         };
 
         nodes.push(newNode);
