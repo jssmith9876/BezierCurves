@@ -18,6 +18,10 @@ const fontColor = "#000000";
 
 const lineColor = "#000000";
 
+const bezierStep = 0.1;
+const bezierColor = "#FF0000";
+const pointRadius = 1;
+
 /*
  *  END CONSTANTS
  */
@@ -44,6 +48,50 @@ let displayNodes = true;
  *  END GLOBALS
  */
 
+/*
+ *  BEGIN MATH FUNCTIONS
+ */
+
+const cubicBSpline = (i, x) => {
+    switch (i) {
+        case 0:
+            return (x >= 0 && x < 1) ? 1 : 0;
+        case 1:
+            return x * cubicBSpline(i - 1, x) + (2 - x) * cubicBSpline(i - 1, x - 1);
+        case 2:
+            return x * cubicBSpline(i - 1, x) / 2 + (3 - x) / 2 * cubicBSpline(i - 1, x - 1);
+        case 3:
+            return x * cubicBSpline(i - 1, x) / 3 + (4 - x) / 3 * cubicBSpline(i - 1, x - 1);
+    }
+}
+
+const support = (i, x) => {
+    switch (i) {
+        case 1:
+            return x * x * (1 - x) * cubicBSpline(0, x) / 2 + x * (2 - x) * cubicBSpline(1, x) / 4 + (3 - x) * cubicBSpline(2, x) / 3;
+        case 2:
+            return x * (1 - x) * (2 - 3 * x / 2) * cubicBSpline(0, x) + (2 - x) * (2 - x) * cubicBSpline(1, x) / 4;
+        case 3:
+            return (1 - x) * (1 - x) * (1 - x) * cubicBSpline(0, x);
+    }
+}
+
+const bezierCurve = (t) => {
+    const numNodes = nodes.length;
+    let bx = 0, by = 0;
+
+    for (let i = 1; i <= numNodes; i++) {
+        const B3 = cubicBSpline(3, numNodes * t - i + 2);
+        bx += nodes[i - 1].x * B3;
+        by += nodes[i - 1].y * B3;
+    }
+
+    return [ bx, by ];
+}
+
+/*
+ *  END MATH FUNCTIONS
+ */
 
 /*
  *  BEGIN HELPER FUNCTIONS
@@ -72,6 +120,26 @@ const getMousePosition = (mouseEvent) => {
             mouseEvent.clientY - rect.top];
 }
 
+const drawBezier = () => {
+    // TODO: This logic could probably be simplified and cleaned-up
+
+    let bezierPoints = [bezierCurve(0)];
+
+    ctx.beginPath();
+    ctx.strokeStyle = bezierColor;
+
+    for (let t = bezierStep; t <= 1; t += bezierStep) {
+        bezierPoints.push(bezierCurve(t));
+        
+        const currPoint = bezierPoints[bezierPoints.length - 1];
+        const prevPoint = bezierPoints[bezierPoints.length - 2];
+        ctx.moveTo(prevPoint[0], prevPoint[1]);
+        ctx.lineTo(currPoint[0], currPoint[1]);
+    }
+
+    ctx.stroke();
+}
+
 const drawLines = () => {
     if (!displayLines) {
         return;
@@ -98,6 +166,8 @@ const drawNodes = () => {
 
     // Draw lines connecting each node
     drawLines();
+
+    drawBezier();
 
     if (!displayNodes) {
         return;
