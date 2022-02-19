@@ -5,12 +5,17 @@
         body {
             background-color: #333;
         }
-        .wrapper {
+        .flex_container {
             display: flex;
+        }
+        .main_wrapper {
             flex-direction: column;
         }
-        .wrapper * {
-            margin: 30px auto;
+        .main_wrapper * {
+            margin: 20px auto;
+        }
+        .buttons {
+            gap: 20px;
         }
         canvas {
             background-color: #fff;
@@ -19,8 +24,12 @@
     <script src="/index.js" async></script>
 </head>
 <body onload="resizeCanvas();">
-    <div class="wrapper">
+    <div class="flex_container main_wrapper">
         <canvas id="mainCanvas"></canvas>
+        <div class="flex_container buttons">
+            <button onclick="toggleLines()">Toggle Lines</button>
+            <button onclick="toggleNodes()">Toggle Nodes</button>
+        </div>
     </div>
 </body>
 </html>

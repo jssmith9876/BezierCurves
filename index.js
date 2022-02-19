@@ -36,6 +36,10 @@ let nodes = [];
 // Node that is currently being selected
 let currentSelected = undefined; 
 
+// Value to check if we should display certain aspects
+let displayLines = true;
+let displayNodes = true;
+
 /*
  *  END GLOBALS
  */
@@ -44,6 +48,16 @@ let currentSelected = undefined;
 /*
  *  BEGIN HELPER FUNCTIONS
  */
+
+// Toggle display functions
+const toggleLines = () => {
+    displayLines = !displayLines;
+    drawNodes();
+}
+const toggleNodes = () => {
+    displayNodes = !displayNodes;
+    drawNodes();
+}
 
 // Resizes the canvas dynamically to the window size when the page first laods
 const resizeCanvas = () => {
@@ -59,6 +73,10 @@ const getMousePosition = (mouseEvent) => {
 }
 
 const drawLines = () => {
+    if (!displayLines) {
+        return;
+    }
+
     ctx.beginPath();
     ctx.strokeStyle = lineColor;
 
@@ -80,6 +98,10 @@ const drawNodes = () => {
 
     // Draw lines connecting each node
     drawLines();
+
+    if (!displayNodes) {
+        return;
+    }
 
     nodes.forEach((node) => {
         ctx.beginPath();
