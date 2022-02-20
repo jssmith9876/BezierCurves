@@ -18,7 +18,7 @@ const fontColor = "#000000";
 
 const lineColor = "#000000";
 
-const bezierStep = 0.1;
+const bezierStep = 0.01;
 const bezierColor = "#FF0000";
 const pointRadius = 1;
 
@@ -40,7 +40,7 @@ let nodes = [];
 // Node that is currently being selected
 let currentSelected = undefined; 
 
-// Value to check if we should display certain aspects
+// Value to check if we should display certain elements
 let displayLines = true;
 let displayNodes = true;
 
@@ -77,14 +77,21 @@ const support = (i, x) => {
 }
 
 const bezierCurve = (t) => {
-    const numNodes = nodes.length;
+    const n = nodes.length - 3;
+    const nt = n * t;
     let bx = 0, by = 0;
 
-    for (let i = 1; i <= numNodes; i++) {
-        const B3 = cubicBSpline(3, numNodes * t - i + 2);
-        bx += nodes[i - 1].x * B3;
-        by += nodes[i - 1].y * B3;
+    bx += nodes[0].x * support(3, nt) + nodes[1].x * support(2, nt) + nodes[2].x * support(1, nt);
+    by += nodes[0].y * support(3, nt) + nodes[1].y * support(2, nt) + nodes[2].y * support(1, nt);
+
+    for (let i = 1; i <= n - 3; i++) {
+        const B3 = cubicBSpline(3, nt - i + 2);
+        bx += nodes[i + 2].x * B3;
+        by += nodes[i + 2].y * B3;
     }
+
+    bx += nodes[n].x * support(1, n - nt) + nodes[n + 1].x * support(2, n - nt) + nodes[n + 2].x * support(3, n - nt);
+    by += nodes[n].y * support(1, n - nt) + nodes[n + 1].y * support(2, n - nt) + nodes[n + 2].y * support(3, n - nt);
 
     return [ bx, by ];
 }
@@ -167,7 +174,9 @@ const drawNodes = () => {
     // Draw lines connecting each node
     drawLines();
 
-    drawBezier();
+    if (nodes.length > 2) {
+        drawBezier();
+    }
 
     if (!displayNodes) {
         return;
