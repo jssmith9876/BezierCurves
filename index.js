@@ -52,46 +52,37 @@ let displayNodes = true;
  *  BEGIN MATH FUNCTIONS
  */
 
-const cubicBSpline = (i, x) => {
-    switch (i) {
-        case 0:
-            return (x >= 0 && x < 1) ? 1 : 0;
-        case 1:
-            return x * cubicBSpline(i - 1, x) + (2 - x) * cubicBSpline(i - 1, x - 1);
-        case 2:
-            return x * cubicBSpline(i - 1, x) / 2 + (3 - x) / 2 * cubicBSpline(i - 1, x - 1);
-        case 3:
-            return x * cubicBSpline(i - 1, x) / 3 + (4 - x) / 3 * cubicBSpline(i - 1, x - 1);
-    }
+// This really starts to chug when we have more than 15 nodes at a given time
+const factorial = (n) => {
+    if (n == 0 || n == 1) 
+        return 1;
+
+    return n * factorial(n - 1);
+}
+const binomialCoeff = (n, k) => {
+    return factorial(n) / (factorial(k) * factorial(n - k))
 }
 
-const support = (i, x) => {
-    switch (i) {
-        case 1:
-            return x * x * (1 - x) * cubicBSpline(0, x) / 2 + x * (2 - x) * cubicBSpline(1, x) / 4 + (3 - x) * cubicBSpline(2, x) / 3;
-        case 2:
-            return x * (1 - x) * (2 - 3 * x / 2) * cubicBSpline(0, x) + (2 - x) * (2 - x) * cubicBSpline(1, x) / 4;
-        case 3:
-            return (1 - x) * (1 - x) * (1 - x) * cubicBSpline(0, x);
+const bernstein = (i, n, t) => {
+    let res;
+    if (i != n) {
+        res = binomialCoeff(n, i) * Math.pow((1-t), (n - i)) * Math.pow(t, i);
+    } else {
+        res = binomialCoeff(n, i) *  Math.pow(t, i);
     }
+    return res;
 }
 
 const bezierCurve = (t) => {
-    const n = nodes.length - 3;
-    const nt = n * t;
-    let bx = 0, by = 0;
+    const n = nodes.length - 1;
 
-    bx += nodes[0].x * support(3, nt) + nodes[1].x * support(2, nt) + nodes[2].x * support(1, nt);
-    by += nodes[0].y * support(3, nt) + nodes[1].y * support(2, nt) + nodes[2].y * support(1, nt);
+    let bx = 0,
+        by = 0;
 
-    for (let i = 1; i <= n - 3; i++) {
-        const B3 = cubicBSpline(3, nt - i + 2);
-        bx += nodes[i + 2].x * B3;
-        by += nodes[i + 2].y * B3;
+    for (let i = 0; i <= n; i++) {
+        bx += nodes[i].x * bernstein(i, n, t);
+        by += nodes[i].y * bernstein(i, n, t);
     }
-
-    bx += nodes[n].x * support(1, n - nt) + nodes[n + 1].x * support(2, n - nt) + nodes[n + 2].x * support(3, n - nt);
-    by += nodes[n].y * support(1, n - nt) + nodes[n + 1].y * support(2, n - nt) + nodes[n + 2].y * support(3, n - nt);
 
     return [ bx, by ];
 }
@@ -104,13 +95,17 @@ const bezierCurve = (t) => {
  *  BEGIN HELPER FUNCTIONS
  */
 
-// Toggle display functions
+// Button functions
 const toggleLines = () => {
     displayLines = !displayLines;
     drawNodes();
 }
 const toggleNodes = () => {
     displayNodes = !displayNodes;
+    drawNodes();
+}
+const clearNodes = () => {
+    nodes = [];
     drawNodes();
 }
 
@@ -128,16 +123,16 @@ const getMousePosition = (mouseEvent) => {
 }
 
 const drawBezier = () => {
-    // TODO: This logic could probably be simplified and cleaned-up
-
     let bezierPoints = [bezierCurve(0)];
 
     ctx.beginPath();
     ctx.strokeStyle = bezierColor;
 
     for (let t = bezierStep; t <= 1; t += bezierStep) {
+        // Add the next point to the curve
         bezierPoints.push(bezierCurve(t));
         
+        // Draw a line to connect the current and previous points
         const currPoint = bezierPoints[bezierPoints.length - 1];
         const prevPoint = bezierPoints[bezierPoints.length - 2];
         ctx.moveTo(prevPoint[0], prevPoint[1]);
@@ -174,6 +169,7 @@ const drawNodes = () => {
     // Draw lines connecting each node
     drawLines();
 
+    // Draw our Bezier curve
     if (nodes.length > 2) {
         drawBezier();
     }

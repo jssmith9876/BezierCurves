@@ -14,6 +14,18 @@
         .main_wrapper * {
             margin: 20px auto;
         }
+        
+        .info {
+            flex-direction: column;
+            justify-content: center;
+            gap: 0;
+            color: #fff;
+        }
+        .info > * {
+            margin-top: 0;
+            margin-bottom: 0.25em;
+        }
+
         .buttons {
             gap: 20px;
         }
@@ -25,10 +37,17 @@
 </head>
 <body onload="resizeCanvas();">
     <div class="flex_container main_wrapper">
+        <div class="info flex_container">
+            <h1>Bezier Curve grapher</h1>
+            <p>To add points to draw your Bezier curve, just click on the canvas below!</p>
+            <p><em>Note: You need at least three points for the curve to appear</em></p>
+        </div>
+
         <canvas id="mainCanvas"></canvas>
         <div class="flex_container buttons">
             <button onclick="toggleLines()">Toggle Lines</button>
             <button onclick="toggleNodes()">Toggle Nodes</button>
+            <button onclick="clearNodes()">Clear Nodes</button>
         </div>
     </div>
 </body>
