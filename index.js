@@ -1,34 +1,32 @@
 /*
- *  BEGIN CONSTANTS
+ *  BEGIN CONSTANTS AND GLOBALS
  */
 
 // Canvas
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
+// Color inputs
+const curveColorPicker = document.querySelector("#bezierColorPicker");
+const lineColorPicker = document.querySelector("#lineColorPicker");
+const nodeColorPicker = document.querySelector("#nodeColorPicker");
+
 // Color and styling specs
-const nodeFillStyle = "#22CCCC";
-const selectedNodeFillStyle = "#88aaaa";
-const nodeStrokeStyle = "#009999";
+let nodeFillStyle = "#22CCCC";
+let selectedNodeFillStyle = "#88aaaa";
+let nodeStrokeStyle = "#009999";
 const nodeRadius = 7;
 
 const fontSize = 18;
 const fontStyle = fontSize + "px Arial";
 const fontColor = "#000000";
 
-const lineColor = "#000000";
+let lineColor = "#000000";
 
 const bezierStep = 0.01;
-const bezierColor = "#FF0000";
+let bezierColor = "#FF0000";
 const pointRadius = 1;
 
-/*
- *  END CONSTANTS
- */
-
-/*
- *  BEGIN GLOBALS
- */
 
 // An array of nodes currently on the canvas
 //  Each node element contains:
@@ -45,7 +43,7 @@ let displayLines = true;
 let displayNodes = true;
 
 /*
- *  END GLOBALS
+ *  END CONSTANTS AND GLOBALS
  */
 
 /*
@@ -95,7 +93,7 @@ const bezierCurve = (t) => {
  *  BEGIN HELPER FUNCTIONS
  */
 
-// Button functions
+// Button functions... Their titles should be self-explanatory 
 const toggleLines = () => {
     displayLines = !displayLines;
     drawNodes();
@@ -267,6 +265,33 @@ canvas.addEventListener('mouseup', (event) => {
     // Redraw 
     drawNodes();
 });
+
+
+// Set the color input's default colors
+curveColorPicker.value = bezierColor;
+lineColorPicker.value = lineColor;
+nodeColorPicker.value = nodeFillStyle;
+
+// Add event listeners for the color pickers on change
+curveColorPicker.addEventListener("change", () => {
+    bezierColor = curveColorPicker.value;
+    drawNodes();
+});
+
+lineColorPicker.addEventListener("change", () => {
+    lineColor = lineColorPicker.value;
+    drawNodes();
+});
+
+nodeColorPicker.addEventListener("change", () => {
+    // TODO: Need to update node stroke color as well as the node selected color
+    //      node stroke color should probably be the same, but the selected color
+    //      should be a darker version of the updated color
+
+    nodeFillStyle = nodeColorPicker.value;
+    drawNodes();
+});
+
 
 /*
  *  END EVENT HANDLERS
