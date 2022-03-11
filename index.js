@@ -14,7 +14,7 @@ const nodeColorPicker = document.querySelector("#nodeColorPicker");
 // Color and styling specs
 let nodeFillStyle = "#22CCCC";
 let selectedNodeFillStyle = "#88aaaa";
-let nodeStrokeStyle = "#009999";
+let nodeStrokeStyle = nodeFillStyle;
 const nodeRadius = 7;
 
 const fontSize = 18;
@@ -203,6 +203,21 @@ const clickedOnNode = (mouseX, mouseY) => {
     });
 }
 
+// Blends two hex colors together by some fixed amount
+// https://stackoverflow.com/questions/6367010/average-2-hex-colors-together-in-javascript
+const blendColors = (color_1, color_2, blendAmount) => {
+    // Get the decimal rgb values for both colors
+    const [ r1, g1, b1 ] = color_1.match(/\w\w/g).map((color) => parseInt(color, 16));
+    const [ r2, g2, b2 ] = color_2.match(/\w\w/g).map((color) => parseInt(color, 16));
+
+    // Convert them back to hex-strings
+    const r = Math.round(r1 + (r2 - r1) * blendAmount).toString(16).padStart(2, '0');
+    const g = Math.round(g1 + (g2 - g1) * blendAmount).toString(16).padStart(2, '0');
+    const b = Math.round(b1 + (b2 - b1) * blendAmount).toString(16).padStart(2, '0');
+
+    return "#" + r + g + b;
+}
+
 /*
  *  END HELPER FUNCTIONS
  */
@@ -284,11 +299,12 @@ lineColorPicker.addEventListener("change", () => {
 });
 
 nodeColorPicker.addEventListener("change", () => {
-    // TODO: Need to update node stroke color as well as the node selected color
-    //      node stroke color should probably be the same, but the selected color
-    //      should be a darker version of the updated color
-
     nodeFillStyle = nodeColorPicker.value;
+    nodeStrokeStyle = nodeFillStyle
+
+    // We want a slightly darker color for when the user actually selects 
+    // a node, so blend it with a mild grey
+    selectedNodeFillStyle = blendColors(nodeFillStyle, "#333333", 0.5);
     drawNodes();
 });
 
